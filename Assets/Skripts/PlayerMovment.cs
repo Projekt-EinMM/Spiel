@@ -9,12 +9,12 @@ public class PlayerMovment : MonoBehaviour{
     bool alive = true;                              //Überprüft den "am Leben" Status
     public float speed = 5;                         //Geschwindigkeit
     public Rigidbody rb = new Rigidbody();          //Rigidbody ist die Spielfigur/Modell
-    float horizontalInput;                          //Der Bewegungsinput, um die Figur zu steuern
+    float horizontalInput = 0;                          //Der Bewegungsinput, um die Figur zu steuern
     public float horizontalMultiplier = 2;
-
+    float read;
     void Start(){
-       // sp.Open();                                  //Öffnet den Verbindungsport
-        //sp.ReadTimeout = 20;                        //Lies-Intervall
+       sp.Open();                                  //Öffnet den Verbindungsport
+        sp.ReadTimeout = 0;                        //Lies-Intervall
     }
 
     private void FixedUpdate(){
@@ -25,28 +25,28 @@ public class PlayerMovment : MonoBehaviour{
     }
 
     /* "Update()" ist eine Methode die jeden Frame aufgerufen wird */
-    void Update(){     
-        sp.Open();         
-        sp.ReadTimeout = 20;                       
+    void Update(){                        
     if (sp.IsOpen){                                 //Wenn der Verbindungsport offen ist, dann wird gelesen was der Mikrokontroller ausgibt
             try{                                    //und je nach Input wird die Figur auf der horizontalen Ebene anders gesteuert
                 if(sp.ReadByte()==0){
                     print(sp.ReadByte());
-                    horizontalInput = 0;            //Neutraler Input = weder Links noch Rechts
+                    horizontalInput =0;            //Neutraler Input = weder Links noch Rechts
                 }
                 if(sp.ReadByte()==1){
                     print(sp.ReadByte());
-                    horizontalInput = -1;           //Negativer Input = nach Links gehen
+                    read = horizontalInput + -0.2f;
+                    horizontalInput = read;           //Negativer Input = nach Links gehen
                 }
                 if(sp.ReadByte()==2){
                     print(sp.ReadByte());
-                    horizontalInput = 1;            //Positiver Input = nach Rechts gehen
+                    read=horizontalInput + 0.2f;
+                    horizontalInput = read;            //Positiver Input = nach Rechts gehen
                 } 
             }
             catch (System.Exception){
             }
         print(horizontalInput);
-        if ((Input.GetAxis("Horizontal")>0.4) && (Input.GetAxis("Horizontal")<-0.4)){                //Wenn bei der Tastatur eine Eingabe passiert, dann wird der Mikrokontroller wert überschrieben
+        if (Input.GetAxis("Horizontal")!=0){                //Wenn bei der Tastatur eine Eingabe passiert, dann wird der Mikrokontroller wert überschrieben
             horizontalInput = Input.GetAxis("Horizontal");  //und man steuert mit der Tastatur
         }
 
@@ -54,7 +54,6 @@ public class PlayerMovment : MonoBehaviour{
             Die();
         }
     }
-    sp.Close();
     }
 
     public void Die(){
@@ -63,6 +62,7 @@ public class PlayerMovment : MonoBehaviour{
     }
 
     void Restart(){
+        sp.Close();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);     //Die "Scene" also das Spiel wird neugestartet
     }
 }
